@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gator/internal/config"
 	"log"
+	"os"
 )
 
 func main() {
@@ -13,14 +14,28 @@ func main() {
 	}
 	fmt.Printf("Read config: %+v\n", cfg)
 
-	err = cfg.SetUser("luke")
-	if err != nil {
-		log.Fatalf("error setting current user: %v", err)
+	s := state{
+		Config: &cfg,
 	}
 
-	cfg2, err := config.Read()
-	if err != nil {
-		log.Fatalf("error reading config: %v", err)
+	cmds := commands{
+		commands: make(map[string]func(*state, command) error),
 	}
-	fmt.Printf("Read config again: %+v\n", cfg2)
+
+	cmds.register("login", handlerLogin)
+
+	args := os.Args
+	if len(args) < 2 {
+		log.Fatalf("command name required")
+	}
+
+	cmd := command{
+		name: args[1],
+		args: args[2:],
+	}
+
+	err = cmds.run(&s, cmd)
+	if err != nil {
+		log.Fatalf("ERROR %v", err)
+	}
 }
