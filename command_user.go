@@ -69,3 +69,28 @@ func handlerRegister(s *state, cmd command) error {
 	fmt.Printf("%s: user %s registered successfully\n", cmd.name, user.Name.String)
 	return nil
 }
+
+func handlerListUsers(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return fmt.Errorf("usage: %s", cmd.name)
+	}
+
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("%s: error getting users: %w", cmd.name, err)
+	}
+
+	for _, user := range users {
+		if !user.Name.Valid {
+			continue
+		}
+
+		txt := fmt.Sprintf("* %s", user.Name.String)
+		if user.Name.String == s.cfg.CurrentUserName {
+			txt += " (current)"
+		}
+		fmt.Println(txt)
+	}
+
+	return nil
+}
