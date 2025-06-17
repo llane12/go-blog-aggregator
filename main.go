@@ -1,21 +1,37 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"gator/internal/config"
+	"gator/internal/database"
 	"log"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
+type state struct {
+	db  *database.Queries
+	cfg *config.Config
+}
+
 func main() {
-	cfg, err := config.Read()
+	config, err := config.Read()
 	if err != nil {
 		log.Fatalf("error reading config: %v", err)
 	}
-	fmt.Printf("Read config: %+v\n", cfg)
+	fmt.Printf("Read config: %+v\n", config)
+
+	db, err := sql.Open("postgres", config.DbUrl)
+	if err != nil {
+		log.Fatalf("error opening database: %v", err)
+	}
+	fmt.Printf("Opened database: %+v\n", config.DbUrl)
 
 	s := state{
-		Config: &cfg,
+		cfg: &config,
+		db:  database.New(db),
 	}
 
 	cmds := commands{
@@ -23,6 +39,7 @@ func main() {
 	}
 
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
 
 	args := os.Args
 	if len(args) < 2 {
