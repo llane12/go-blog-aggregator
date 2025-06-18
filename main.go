@@ -43,6 +43,8 @@ func main() {
 	cmds.register("users", handlerListUsers)
 	cmds.register("reset", handlerReset)
 
+	cmds.register("agg", handlerAggregate)
+
 	args := os.Args
 	if len(args) < 2 {
 		log.Fatalf("command name required")
