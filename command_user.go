@@ -17,10 +17,7 @@ func handlerLogin(s *state, cmd command) error {
 
 	username := cmd.args[0]
 
-	_, err := s.db.GetUser(context.Background(), sql.NullString{
-		String: username,
-		Valid:  true,
-	})
+	_, err := s.db.GetUser(context.Background(), username)
 
 	if err != nil {
 		if err.Error() != sql.ErrNoRows.Error() {
@@ -51,10 +48,7 @@ func handlerRegister(s *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: now,
 		UpdatedAt: now,
-		Name: sql.NullString{
-			String: username,
-			Valid:  true,
-		},
+		Name:      username,
 	})
 
 	if err != nil {
@@ -66,7 +60,7 @@ func handlerRegister(s *state, cmd command) error {
 		return err
 	}
 
-	fmt.Printf("%s: user %s registered successfully\n", cmd.name, user.Name.String)
+	fmt.Printf("%s: user %s registered successfully\n", cmd.name, user.Name)
 	return nil
 }
 
@@ -81,12 +75,8 @@ func handlerListUsers(s *state, cmd command) error {
 	}
 
 	for _, user := range users {
-		if !user.Name.Valid {
-			continue
-		}
-
-		txt := fmt.Sprintf("* %s", user.Name.String)
-		if user.Name.String == s.cfg.CurrentUserName {
+		txt := fmt.Sprintf("* %s", user.Name)
+		if user.Name == s.cfg.CurrentUserName {
 			txt += " (current)"
 		}
 		fmt.Println(txt)
