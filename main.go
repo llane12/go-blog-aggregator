@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"gator/internal/config"
 	"gator/internal/database"
 	"log"
@@ -21,13 +20,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("error reading config: %v", err)
 	}
-	fmt.Printf("Read config: %+v\n", config)
 
 	db, err := sql.Open("postgres", config.DbUrl)
 	if err != nil {
 		log.Fatalf("error opening database: %v", err)
 	}
-	fmt.Printf("Opened database: %+v\n", config.DbUrl)
 
 	s := state{
 		cfg: &config,
@@ -45,6 +42,7 @@ func main() {
 
 	cmds.register("agg", handlerAggregate)
 	cmds.register("addfeed", handlerAddFeed)
+	cmds.register("feeds", handlerListFeeds)
 
 	args := os.Args
 	if len(args) < 2 {

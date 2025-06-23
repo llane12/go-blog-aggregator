@@ -44,7 +44,7 @@ func handlerRegister(s *state, cmd command) error {
 	username := cmd.args[0]
 	now := time.Now().UTC()
 
-	user, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
+	_, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -60,7 +60,7 @@ func handlerRegister(s *state, cmd command) error {
 		return err
 	}
 
-	fmt.Printf("%s: user %s registered successfully\n", cmd.name, user.Name)
+	fmt.Printf("%s: user registered successfully\n", cmd.name)
 	return nil
 }
 
@@ -72,6 +72,11 @@ func handlerListUsers(s *state, cmd command) error {
 	users, err := s.db.GetUsers(context.Background())
 	if err != nil {
 		return fmt.Errorf("%s: error getting users: %w", cmd.name, err)
+	}
+
+	if len(users) == 0 {
+		fmt.Println("No users found.")
+		return nil
 	}
 
 	for _, user := range users {
