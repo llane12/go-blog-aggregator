@@ -14,7 +14,9 @@ func handlerAddFeed(s *state, cmd command) error {
 		return fmt.Errorf("usage: %s <name> <url>", cmd.name)
 	}
 
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	ctx := context.Background()
+
+	user, err := s.db.GetUser(ctx, s.cfg.CurrentUserName)
 	if err != nil {
 		return fmt.Errorf("%s: error getting current user: %w", cmd.name, err)
 	}
@@ -23,7 +25,7 @@ func handlerAddFeed(s *state, cmd command) error {
 	url := cmd.args[1]
 	now := time.Now().UTC()
 
-	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
+	feed, err := s.db.CreateFeed(ctx, database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -31,9 +33,19 @@ func handlerAddFeed(s *state, cmd command) error {
 		Url:       url,
 		UserID:    user.ID,
 	})
-
 	if err != nil {
 		return fmt.Errorf("%s: error creating feed: %w", cmd.name, err)
+	}
+
+	_, err = s.db.CreateFeedFollow(ctx, database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: now,
+		UpdatedAt: now,
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("%s: error creating feed follow: %w", cmd.name, err)
 	}
 
 	fmt.Printf("feed created: %+v\n", feed)
