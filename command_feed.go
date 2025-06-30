@@ -9,14 +9,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 2 {
 		return fmt.Errorf("usage: %s <name> <url>", cmd.name)
 	}
 
-	ctx := context.Background()
-
-	user, err := s.db.GetUser(ctx, s.cfg.CurrentUserName)
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
 	if err != nil {
 		return fmt.Errorf("%s: error getting current user: %w", cmd.name, err)
 	}
@@ -25,7 +23,7 @@ func handlerAddFeed(s *state, cmd command) error {
 	url := cmd.args[1]
 	now := time.Now().UTC()
 
-	feed, err := s.db.CreateFeed(ctx, database.CreateFeedParams{
+	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -37,7 +35,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		return fmt.Errorf("%s: error creating feed: %w", cmd.name, err)
 	}
 
-	_, err = s.db.CreateFeedFollow(ctx, database.CreateFeedFollowParams{
+	_, err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -57,9 +55,7 @@ func handlerListFeeds(s *state, cmd command) error {
 		return fmt.Errorf("usage: %s", cmd.name)
 	}
 
-	ctx := context.Background()
-
-	feeds, err := s.db.GetFeeds(ctx)
+	feeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
 		return fmt.Errorf("%s: error getting feeds: %w", cmd.name, err)
 	}
@@ -71,7 +67,7 @@ func handlerListFeeds(s *state, cmd command) error {
 
 	for i, feed := range feeds {
 
-		user, err := s.db.GetUserById(ctx, feed.UserID)
+		user, err := s.db.GetUserById(context.Background(), feed.UserID)
 		if err != nil {
 			return fmt.Errorf("%s: error getting user %s: %w", cmd.name, feed.UserID, err)
 		}

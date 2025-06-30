@@ -9,28 +9,21 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 1 {
 		return fmt.Errorf("usage: %s <url>", cmd.name)
 	}
 
-	ctx := context.Background()
-
-	user, err := s.db.GetUser(ctx, s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("%s: error getting current user: %w", cmd.name, err)
-	}
-
 	url := cmd.args[0]
 
-	feed, err := s.db.GetFeedByUrl(ctx, url)
+	feed, err := s.db.GetFeedByUrl(context.Background(), url)
 	if err != nil {
 		return fmt.Errorf("%s: error getting feed %s: %w", cmd.name, url, err)
 	}
 
 	now := time.Now().UTC()
 
-	feed_follow, err := s.db.CreateFeedFollow(ctx, database.CreateFeedFollowParams{
+	feed_follow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -45,19 +38,12 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 0 {
 		return fmt.Errorf("usage: %s", cmd.name)
 	}
 
-	ctx := context.Background()
-
-	user, err := s.db.GetUser(ctx, s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("%s: error getting current user: %w", cmd.name, err)
-	}
-
-	feed_follows, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
+	feed_follows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return fmt.Errorf("%s: error getting feed follows for user %s: %w", cmd.name, user.Name, err)
 	}
