@@ -1,4 +1,4 @@
-# Gator: Blog Aggregator in Go
+# gator: Blog Aggregator in Go
 
 Scrapes registered blogs (RSS feeds), parses the XML and saves the posts to a database.
 
