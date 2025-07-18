@@ -42,12 +42,10 @@ func handlerRegister(s *state, cmd command) error {
 	}
 
 	username := cmd.args[0]
-	now := time.Now().UTC()
 
 	_, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
 		ID:        uuid.New(),
-		CreatedAt: now,
-		UpdatedAt: now,
+		CreatedAt: time.Now().UTC(),
 		Name:      username,
 	})
 

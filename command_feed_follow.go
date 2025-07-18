@@ -21,12 +21,9 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 		return fmt.Errorf("%s: error getting feed %s: %w", cmd.name, url, err)
 	}
 
-	now := time.Now().UTC()
-
 	feed_follow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
-		CreatedAt: now,
-		UpdatedAt: now,
+		CreatedAt: time.Now().UTC(),
 		UserID:    user.ID,
 		FeedID:    feed.ID,
 	})

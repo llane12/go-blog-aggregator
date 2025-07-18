@@ -15,7 +15,7 @@ import (
 const createFeedFollow = `-- name: CreateFeedFollow :one
 WITH inserted_feed_follow AS (
     INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
-    VALUES ($1, $2, $3, $4, $5)
+    VALUES ($1, $2, $2, $3, $4)
     RETURNING id, created_at, updated_at, user_id, feed_id
 )
 SELECT
@@ -30,7 +30,6 @@ INNER JOIN users ON inserted_feed_follow.user_id = users.id
 type CreateFeedFollowParams struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
-	UpdatedAt time.Time
 	UserID    uuid.UUID
 	FeedID    uuid.UUID
 }
@@ -49,7 +48,6 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 	row := q.db.QueryRowContext(ctx, createFeedFollow,
 		arg.ID,
 		arg.CreatedAt,
-		arg.UpdatedAt,
 		arg.UserID,
 		arg.FeedID,
 	)
